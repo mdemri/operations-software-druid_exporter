@@ -21,7 +21,8 @@ import sys
 
 from druid_exporter import collector
 from prometheus_client import generate_latest, make_wsgi_app, REGISTRY
-from wsgiref.simple_server import make_server
+from socketserver import ThreadingMixIn
+from wsgiref.simple_server import make_server, WSGIServer
 
 log = logging.getLogger(__name__)
 
@@ -63,6 +64,10 @@ class DruidWSGIApp(object):
         return ''
 
 
+class ThreadingWSGIServer(ThreadingMixIn, WSGIServer):
+    pass
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-l', '--listen', metavar='ADDRESS',
@@ -91,7 +96,7 @@ def main():
     druid_wsgi_app = DruidWSGIApp(args.uri, druid_collector,
                                   prometheus_app, args.encoding)
 
-    httpd = make_server(address, int(port), druid_wsgi_app)
+    httpd = make_server(address, int(port), druid_wsgi_app, ThreadingWSGIServer)
     httpd.serve_forever()
 
 
