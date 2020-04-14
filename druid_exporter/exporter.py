@@ -54,6 +54,9 @@ class DruidWSGIApp(object):
             except Exception as e:
                 log.exception('Error while processing the following POST data')
                 status = '400 Bad Request'
+        elif (environ['REQUEST_METHOD'] == 'GET' and
+                environ['PATH_INFO'] == '/health'):
+            status = '200 OK'
         else:
             status = '400 Bad Request'
         start_response(status, [])
